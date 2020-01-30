@@ -8,14 +8,27 @@
 
 import UIKit
 
-class SettingDisingLabel: ILabelDising {
+class SettingDisingLabel: ILabelDisign {
     
     var fontTitle = Font(font: 20, fontColor: .white)
     
 }
 
 class AdjustingLabel: Label {
-    override func buildDising() -> ILabelDising {
+    override func buildDisign() -> ILabelDisign {
         return SettingDisingLabel()
+    }
+}
+
+
+
+
+class SettingSimpleLabel: ILabelDisign {
+    var fontTitle: Font = Font(font: 30, fontColor: .orange)
+}
+
+class SimpleLabel: Label {
+    override func buildDisign() -> ILabelDisign {
+        return SettingSimpleLabel()
     }
 }

@@ -9,7 +9,8 @@
 import Foundation
 
 protocol IMapper {
-    func makeTaxableItems(scannedGoods: [ScannableItem], registeredGoods: [RegisterableItem]) -> [TaxableItem]
-    func makePrintableItems(scannedGoods: [ScannableItem], registeredGoods: [RegisterableItem]) -> [PrintableItem]
-    func makeDemonstrationItems(scannedGoods: ScannableItem, registeredGoods: [RegisterableItem]) -> [ShowableItems]
+    func makeTaxableItems(scannedGoods: [ScannableItem], registeredGoods: [String: RegisterableItem]) throws -> [TaxableItem]
+    func makePrintableItems(scannedGoods: [ScannableItem], registeredGoods: [String: RegisterableItem]) throws -> [PrintableItem]
+    func makeDemonstrationItems(item: ScannableItem, registeredGoods: [String: RegisterableItem]) throws -> [ShowableItems]
+    func performConversions(scanItems: [ScannableItem], regItems: [String: RegisterableItem]) throws -> [ShowableItems]
 }

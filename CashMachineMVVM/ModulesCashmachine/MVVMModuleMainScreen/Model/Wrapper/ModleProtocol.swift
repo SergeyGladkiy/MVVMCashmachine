@@ -8,10 +8,12 @@
 
 import Foundation
 
-protocol ModelProtocol {
-    var showableItemsArray: Observable<[ShowableItems]> { get }
+protocol ModelProtocol: class {
+    var dataOfItems: [ShowableItems] { get }
     var errorOccure: Observable<String> { get }
     var readyBill: Observable<String> { get }
+    
+    func changeSubscriptOfItem(from: Int, to: Int)
     
     func registerItem(name: String, code: String, priceCurrency: String, priceValue: Double, tax: TaxMode)
     func scanItem(code: String, quantity: Double)

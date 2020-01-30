@@ -19,8 +19,16 @@ class EntityMocker {
         return vms
     }
     
-    static func generateRegisterableItemsForRegistration() -> [RegisterableItem] {
-        return [RegisterableItem(name: "батон Губернский", code: "8345", price: Price(currencyUnit: "RUB", value: 70), tax: .NDS), RegisterableItem(name: "Сервелат 350г", code: "2032", price: Price(currencyUnit: "RUB", value: 470), tax: .NDS), RegisterableItem(name: "Водка Gradus 0.5л", code: "169", price: Price(currencyUnit: "RUB", value: 400), tax: .Excise)]
+    static func generateRegisterableItemsForRegistration() -> [String: RegisterableItem] {
+        return ["8345": RegisterableItem(name: "батон Губернский", price: Price(currencyUnit: "RUB", value: 70), tax: .NDS), "2032": RegisterableItem(name: "Сервелат 350г", price: Price(currencyUnit: "RUB", value: 470), tax: .NDS), "169": RegisterableItem(name: "Водка Gradus 0.5л", price: Price(currencyUnit: "RUB", value: 400), tax: .Excise)]
+    }
+    
+    static func generateRegisterableItem() -> [String: RegisterableItem] {
+        return ["8345": RegisterableItem(name: "батон Губернский", price: Price(currencyUnit: "RUB", value: 70), tax: .NDS)]
+    }
+    
+    static func generateKeyForRegistration() -> String {
+        return "8345"
     }
     
     static func generateShowableItem() -> ShowableItems {
@@ -29,10 +37,6 @@ class EntityMocker {
     
     static func showableItems() -> ShowableItems {
         return ShowableItems(code: "8345", quantity: 3, name: "батон Губернский", value: 70)
-    }
-    
-    static func generateRegisterableItem() -> RegisterableItem {
-        return RegisterableItem(name: "батон Губернский", code: "8345", price: Price(currencyUnit: "RUB", value: 70), tax: .NDS)
     }
     
     static func generateScannableItem() -> ScannableItem {

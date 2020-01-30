@@ -11,28 +11,20 @@ import Swinject
 
 class MainScreenAssembly: Assembly {
     
-    //private lazy var viewModel = ViewModelMainScreen(state: .init(observable: .initial))
-    
     func assemble(container: Container) {
         
         container.register(MainScreenRouterInput.self) { _ in
             CoordinatorMainScreen()
         }
-//        container.register(ControllerMainScreen.self) { r in
-//            let viewModel = r.resolve(MainScreenViewModelProtocol.self)!
-//            return ControllerMainScreen(viewModel: viewModel)
-//        }
         
         container.register(MainScreenViewModelProtocol.self) { r in
             let model = r.resolve(ModelProtocol.self)!
-            return ViewModelMainScreen(state: .initial, model: model)
-//            self.viewModel.wrapperModel = DependenceProvider.resolve()
-//            return self.viewModel
+            return ViewModelMainScreen(state: Observable<ViewModelMainScreenState>(observable: .initial), model: model)
         }
         
         container.register(ModelProtocol.self) { r in
             let model = r.resolve(CashMachine.self)!
-            return ModelItem(model: model)
+            return CashmachineModel(model: model)
         }
     }
 }

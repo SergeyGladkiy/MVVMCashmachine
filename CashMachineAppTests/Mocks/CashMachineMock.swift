@@ -23,10 +23,18 @@ class CashMachineMock {
 }
 
 extension CashMachineMock: ModelProtocol {
+    var dataOfItems: [ShowableItems] {
+        return showableItemsArray.observable
+    }
+    
+    func changeSubscriptOfItem(from: Int, to: Int) {
+        //
+    }
+    
    
     func registerItem(name: String, code: String, priceCurrency: String, priceValue: Double, tax: TaxMode) {
         for registeredItem in EntityMocker.generateRegisterableItemsForRegistration() {
-            if registeredItem.code == code {
+            if registeredItem.key == code {
                 errorOccure.observable = "товар с таким кодом уже зарегистрирован"
             }
         }
@@ -34,7 +42,7 @@ extension CashMachineMock: ModelProtocol {
     
     func scanItem(code: String, quantity: Double) {
         let scanItem = ScannableItem(code: code, quantity: quantity)
-        showableItemsArray.observable.append(contentsOf: mapper.makeDemonstrationItems(scannedGoods: scanItem, registeredGoods: []))
+        showableItemsArray.observable.append(contentsOf: try! mapper.makeDemonstrationItems(item: scanItem, registeredGoods: [:]))
     }
     
     func pay() {

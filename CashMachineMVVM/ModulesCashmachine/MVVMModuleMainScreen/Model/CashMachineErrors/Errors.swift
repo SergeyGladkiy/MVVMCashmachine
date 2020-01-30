@@ -8,12 +8,12 @@
 
 import Foundation
 
-enum CashmashineErrors {
+enum CashmachineErrors {
     case goodsNotFound
     case registerSecondTime
 }
 
-extension CashmashineErrors: Error {
+extension CashmachineErrors: Error {
     var localizedDescription: String {
         switch self {
         case .goodsNotFound:

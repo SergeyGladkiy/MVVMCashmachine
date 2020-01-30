@@ -13,10 +13,15 @@ class GoodsTableViewCell: UITableViewCell {
     private var arrayConstraints: [NSLayoutConstraint] = []
     
     private weak var nameLabel: UILabel!
+    private weak var leftConstraintLabel: NSLayoutConstraint!
     
     weak var viewModel: TableViewCellViewModel? {
         didSet {
+            
             nameLabel.text = viewModel?.description
+            
+            //MARK: сам отодвинет лейбел при режиме редактирования
+            //self.textLabel?.text = viewModel?.description
         }
     }
     
@@ -24,13 +29,19 @@ class GoodsTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         layoutCell()
     }
-    
-    
+
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         layoutCell()
     }
-    
+
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        print(#function)
+        leftConstraintLabel.constant = editing ? 45 : 20
+        separatorInset.left = editing ? 45 : 20
+    }
     
 }
 
@@ -43,10 +54,10 @@ extension GoodsTableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         let centerYLabel = label.centerYAnchor.constraint(equalTo: centerYAnchor)
-        let rightLabel = label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20)
+        leftConstraintLabel = label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20)
         nameLabel = label
         
-        arrayConstraints.append(contentsOf: [centerYLabel, rightLabel])
+        arrayConstraints.append(contentsOf: [centerYLabel, leftConstraintLabel])
         
         NSLayoutConstraint.activate(arrayConstraints)
         

@@ -29,7 +29,6 @@ enum TaxMode: Double {
 
 struct RegisterableItem {
     let name: String
-    let code: String
     let price: Price
     let tax: TaxMode
 }

@@ -25,7 +25,7 @@ extension ScannerUnit: Scanner {
     
     func registration(barCode: String, name: String, price: Price, tax: TaxMode) {
         do {
-            try delegate.register(item: RegisterableItem(name: name, code: barCode, price: price, tax: tax))
+            try delegate.register(code: barCode, item: RegisterableItem(name: name, price: price, tax: tax))
         } catch {
             return
         }

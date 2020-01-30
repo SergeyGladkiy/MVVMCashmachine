@@ -11,17 +11,17 @@ import Foundation
 class Observable<T> {
     var observable: T {
         didSet {
-            onChanged?(observable)
+            onChanged?(observable) // bind kicks off
         }
     }
-    private var onChanged: ((T)-> Void)?
+    private var onChanged: ((T)-> Void)? // closure of bind parameter bindingClosure
     
     init(observable: T) {
         self.observable = observable
     }
     
     func bind(bindingClosure: @escaping (T)-> Void) {
-        bindingClosure(observable)
+        bindingClosure(observable) // for prime value
         self.onChanged = bindingClosure
     }
 }

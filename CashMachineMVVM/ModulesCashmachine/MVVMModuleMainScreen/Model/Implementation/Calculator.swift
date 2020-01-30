@@ -19,7 +19,8 @@ extension Calculator: TaxCalculator {
             if i.taxes == .NDS {
                 totalTax += i.price * i.taxes.rawValue * i.quantity
             } else {
-                totalTax += i.taxes.rawValue * i.quantity
+                let excise = i.price
+                totalTax += excise * i.quantity
             }
         }
         return round(totalTax)

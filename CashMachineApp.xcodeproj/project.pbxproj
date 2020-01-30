@@ -23,7 +23,7 @@
 		8202A9E42287409E005CA045 /* Structs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202A9DA2287409E005CA045 /* Structs.swift */; };
 		8225ED2422E0944F00F673F5 /* CalculatorMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8225ED2322E0944F00F673F5 /* CalculatorMock.swift */; };
 		8225ED2622E09D0200F673F5 /* BillPrinterMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8225ED2522E09D0200F673F5 /* BillPrinterMock.swift */; };
-		822CE1EB22D61CD200D54BC6 /* ModelItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822CE1EA22D61CD200D54BC6 /* ModelItem.swift */; };
+		822CE1EB22D61CD200D54BC6 /* CashmachineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822CE1EA22D61CD200D54BC6 /* CashmachineModel.swift */; };
 		822CE1ED22D61D4700D54BC6 /* ModleProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822CE1EC22D61D4700D54BC6 /* ModleProtocol.swift */; };
 		82540EFE22995848007CB5F3 /* CoordinatorMainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82540EFD22995848007CB5F3 /* CoordinatorMainScreen.swift */; };
 		826D8CE622C2240900C8F315 /* MainScreenViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D8CE522C2240900C8F315 /* MainScreenViewModelProtocol.swift */; };
@@ -94,7 +94,7 @@
 		8225ED2322E0944F00F673F5 /* CalculatorMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorMock.swift; sourceTree = "<group>"; };
 		8225ED2522E09D0200F673F5 /* BillPrinterMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillPrinterMock.swift; sourceTree = "<group>"; };
 		8225ED2722E0A82D00F673F5 /* ScannerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerMock.swift; sourceTree = "<group>"; };
-		822CE1EA22D61CD200D54BC6 /* ModelItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelItem.swift; sourceTree = "<group>"; };
+		822CE1EA22D61CD200D54BC6 /* CashmachineModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashmachineModel.swift; sourceTree = "<group>"; };
 		822CE1EC22D61D4700D54BC6 /* ModleProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModleProtocol.swift; sourceTree = "<group>"; };
 		82540EFD22995848007CB5F3 /* CoordinatorMainScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorMainScreen.swift; sourceTree = "<group>"; };
 		826D8CE522C2240900C8F315 /* MainScreenViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenViewModelProtocol.swift; sourceTree = "<group>"; };
@@ -239,7 +239,7 @@
 		822CE1EE22D630E400D54BC6 /* Wrapper */ = {
 			isa = PBXGroup;
 			children = (
-				822CE1EA22D61CD200D54BC6 /* ModelItem.swift */,
+				822CE1EA22D61CD200D54BC6 /* CashmachineModel.swift */,
 				822CE1EC22D61D4700D54BC6 /* ModleProtocol.swift */,
 			);
 			path = Wrapper;
@@ -300,6 +300,7 @@
 			isa = PBXGroup;
 			children = (
 				82F1A89322A001E6007A1C29 /* Coordinator.swift */,
+				82D22DBE22CF586E002DC597 /* MainScreenRouterInput.swift */,
 			);
 			path = CoordinatorInterface;
 			sourceTree = "<group>";
@@ -456,7 +457,6 @@
 				826D8CF922C37BF600C8F315 /* CoordinatorInterface */,
 				82F1A89522A002EB007A1C29 /* ApplicationCoordinator.swift */,
 				82540EFD22995848007CB5F3 /* CoordinatorMainScreen.swift */,
-				82D22DBE22CF586E002DC597 /* MainScreenRouterInput.swift */,
 			);
 			path = CoordinatorCashMachine;
 			sourceTree = "<group>";
@@ -647,7 +647,7 @@
 				82D5E6972269F74700DD9AE6 /* IMapper.swift in Sources */,
 				82F1A89622A002EB007A1C29 /* ApplicationCoordinator.swift in Sources */,
 				82D5E6922269F74700DD9AE6 /* ControllerMainScreen.swift in Sources */,
-				822CE1EB22D61CD200D54BC6 /* ModelItem.swift in Sources */,
+				822CE1EB22D61CD200D54BC6 /* CashmachineModel.swift in Sources */,
 				826D8CEB22C2274100C8F315 /* Observable.swift in Sources */,
 				826D8CFD22C37E1700C8F315 /* MainScreenAssebly.swift in Sources */,
 				82D5E69D2269F74700DD9AE6 /* Calculator.swift in Sources */,

@@ -9,18 +9,20 @@
 import Foundation
 
 class ViewModelMainScreen {
-    private var modelItem: ModelProtocol!
+    private unowned var model: ModelProtocol
     private var error: String!
     private var check: String!
-    var state = Observable<ViewModelMainScreenState>(observable: .initial)
+    var state: Observable<ViewModelMainScreenState>
     
-    init(state: ViewModelMainScreenState, model: ModelProtocol) {
-        self.state.observable = state
-        self.modelItem = model
+    init(state: Observable<ViewModelMainScreenState>, model: ModelProtocol) {
+        self.state = state
+        self.model = model
+        twoWayDataBinding()
     }
 }
 
 extension ViewModelMainScreen: MainScreenViewModelProtocol {
+    
     var errorHappened: String {
         return error
     }
@@ -30,41 +32,53 @@ extension ViewModelMainScreen: MainScreenViewModelProtocol {
     }
     
     func twoWayDataBinding() {
-        modelItem.errorOccure.bind { (error) in
+        model.errorOccure.bind { (error) in
+            if error == "" {
+                return
+            }
             self.error = error
             self.state.observable = .errorHappend
         }
-        modelItem.readyBill.bind { (bill) in
+        model.readyBill.bind { (bill) in
+            if bill == "" {
+                return
+            }
             self.check = bill
             self.state.observable = .printBill
         }
     }
     
     func registerItem(name: String, code: String, priceCurrency: String, priceValue: Double, tax: TaxMode) {
-        modelItem.registerItem(name: name, code: code, priceCurrency: priceCurrency, priceValue: priceValue, tax: tax)
+        model.registerItem(name: name, code: code, priceCurrency: priceCurrency, priceValue: priceValue, tax: tax)
     }
     
     func scanItem(code: String, quantity: Double) {
-        modelItem.scanItem(code: code, quantity: quantity)
+        model.scanItem(code: code, quantity: quantity)
         state.observable = .chosenShowableItems
     }
     
     func numberOfRows() -> Int {
-        return modelItem.showableItemsArray.observable.count
+        print(#function)
+        return model.dataOfItems.count
     }
     
     func cellViewModel(forIndexPath indexPath: IndexPath) -> TableViewCellViewModel? {
-        let item = modelItem.showableItemsArray.observable[indexPath.row]
+        print(#function)
+        let item = model.dataOfItems[indexPath.row]
         return TableViewCellViewModel(model: item)
     }
     
     func removeScannedItems(at: Int) {
-        modelItem.deleteItem(index: at)
+        model.deleteItem(index: at)
         state.observable = .chosenShowableItems
     }
     
+    func moveRow(at: Int, to: Int) {
+        model.changeSubscriptOfItem(from: at, to: to)
+    }
+    
     func pay() {
-        modelItem.pay()
+        model.pay()
         state.observable = .chosenShowableItems
     }
 }

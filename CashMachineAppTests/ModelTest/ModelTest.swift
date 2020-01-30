@@ -21,7 +21,7 @@ class ModelTest: XCTestCase {
     var checkFromDevice: String!
     
     override func setUp() {
-        super.setUp()
+        //super.setUp()
         let mapper = MapperMock()
         mockScanner = ScannerMock()
         mockCashierCredentials = "Tanaeva Kristina Aleksandrovna"
@@ -43,7 +43,7 @@ class ModelTest: XCTestCase {
         mockBillPrinter = nil
         mockPrintingDevice = nil
         checkFromDevice = nil
-        super.tearDown()
+        //super.tearDown()
     }
     
     func testPayFunction() {
@@ -56,7 +56,7 @@ class ModelTest: XCTestCase {
         
         //when
         do {
-            try cashmachine.register(item: itemReg)
+            try cashmachine.register(code: itemReg.keys.first!, item: itemReg.values.first!)
         } catch {
             errorOccur = error.localizedDescription
         }
@@ -70,7 +70,7 @@ class ModelTest: XCTestCase {
         }
         
         //when
-        cashmachine.pay()
+        try? cashmachine.pay()
         
         //then
         XCTAssert(checkFromDevice == bill, "неверный чек")
@@ -85,7 +85,7 @@ class ModelTest: XCTestCase {
         
         //when
         do {
-            try cashmachine.register(item: itemReg)
+            try cashmachine.register(code: itemReg.keys.first!, item: itemReg.values.first!)
         } catch {
             errorOccur = error.localizedDescription
         }
@@ -109,21 +109,23 @@ class ModelTest: XCTestCase {
         //given
         let errorRegistration = "товар с таким кодом уже зарегистрирован"
         let itemReg = EntityMocker.generateRegisterableItem()
+        let key = itemReg.keys.first!
+        let value = itemReg.values.first!
         var errorOccur = ""
         let itemRegTheSame = EntityMocker.generateRegisterableItem()
         
         //when
         do {
-            try cashmachine.register(item: itemReg)
-        } catch let error as CashmashineErrors {
+            try cashmachine.register(code: key, item: value)
+        } catch let error as CashmachineErrors {
             errorOccur = error.localizedDescription
         } catch {
             errorOccur = "ERROR"
         }
         
         do {
-            try cashmachine.register(item: itemRegTheSame)
-        } catch let error as CashmashineErrors {
+            try cashmachine.register(code: key, item: value)
+        } catch let error as CashmachineErrors {
             errorOccur = error.localizedDescription
             //then
             XCTAssert(errorOccur == errorRegistration, "неверная ошибка")
@@ -142,8 +144,8 @@ class ModelTest: XCTestCase {
         
         //when
         do {
-            try cashmachine.register(item: itemReg)
-        } catch let error as CashmashineErrors {
+            try cashmachine.register(code: itemReg.keys.first!, item: itemReg.values.first!)
+        } catch let error as CashmachineErrors {
             errorOccur = error.localizedDescription
         } catch {
             errorOccur = "ERROR"
@@ -151,7 +153,7 @@ class ModelTest: XCTestCase {
         
         do {
             try cashmachine.scan(item: itemScan)
-        } catch let error as CashmashineErrors {
+        } catch let error as CashmachineErrors {
             errorOccur = error.localizedDescription
             //then
             XCTAssert(errorScan == errorOccur, "неверная ошибка")

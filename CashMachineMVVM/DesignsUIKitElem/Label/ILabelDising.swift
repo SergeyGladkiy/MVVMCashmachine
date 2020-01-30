@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol ILabelDising {
+protocol ILabelDisign {
     
     var fontTitle: Font { get }
     

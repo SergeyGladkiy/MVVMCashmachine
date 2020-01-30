@@ -12,7 +12,7 @@ class CashMachine {
     
     var showableItemsArray: Observable<[ShowableItems]> = Observable<[ShowableItems]>(observable: [])
     
-    private var registeredGoods: [RegisterableItem] = []
+    private var registeredGoods =  Dictionary<String, RegisterableItem>()
     private var shoplist: [ScannableItem] = []
     
     private var cashierCredentials: String
@@ -29,23 +29,22 @@ class CashMachine {
         self.cashierCredentials = cashierCredentials
     }
     
-    private func sumShopList() -> Double {
+    private func sumShopList() throws -> Double {
         var sum = 0.0
-        for i in shoplist {
-            for j in registeredGoods {
-                if j.code == i.code {
-                    sum += i.quantity * j.price.value
-                }
+        _ = try shoplist.map {
+            guard let key = registeredGoods[$0.code] else {
+                throw CashmachineErrors.goodsNotFound
             }
+            sum += $0.quantity * key.price.value
         }
         return sum
     }
     
-    func pay() {
-        let taxableItems = mapper.makeTaxableItems(scannedGoods: shoplist, registeredGoods: registeredGoods)
-        let printableItems = mapper.makePrintableItems(scannedGoods: shoplist, registeredGoods: registeredGoods)
+    func pay() throws {
+        let taxableItems = try mapper.makeTaxableItems(scannedGoods: shoplist, registeredGoods: registeredGoods)
+        let printableItems = try mapper.makePrintableItems(scannedGoods: shoplist, registeredGoods: registeredGoods)
         let sumTax = taxCalculator.countTax(array: taxableItems)
-        let amount = sumShopList()
+        let amount = try sumShopList()
         let fullAmount = sumTax + amount
         let bill = billPrinter.countBill(array: printableItems, cachierInf: cashierCredentials, totalTax: sumTax, sum: fullAmount)
         print(bill)
@@ -54,13 +53,14 @@ class CashMachine {
         showableItemsArray.observable = []
     }
     
-//    private func makeShoppingScreenItems() -> [ShowableItems] {
-//        return mapper.makeDemonstrationItems(scannedGoods: shoplist, registeredGoods: registeredGoods)
-//    }
-    
     func removeScannedItem(index: Int) {
         shoplist.remove(at: index)
         showableItemsArray.observable.remove(at: index)
+    }
+    
+    func motionItem(index: Int, newIndex: Int) throws {
+        let item = shoplist.remove(at: index)
+        shoplist.insert(item, at: newIndex)
     }
 }
 
@@ -69,20 +69,16 @@ class CashMachine {
 extension CashMachine: ScannerDelegate {
     
     
-    func register(item: RegisterableItem) throws {
+    func register(code: String, item: RegisterableItem) throws {
         // регистрируемое проверяем в массиве зарегистрированнх
-        for i in registeredGoods {
-            if i.code == item.code {
-                throw CashmashineErrors.registerSecondTime
-            }
+        if registeredGoods[code] == nil {
+            registeredGoods[code] = item
+            return
         }
-        registeredGoods.append(item)
+        throw CashmachineErrors.registerSecondTime
     }
     
-    
-    //
-    func scan(item: ScannableItem) throws  { // throws должна быть помечина
-        
+    func scan(item: ScannableItem) throws  {
         // ищем товар в отсканированных и если находим увеличиваем кол-во
         for i in 0..<shoplist.count {
             if item.code == shoplist[i].code {
@@ -91,14 +87,12 @@ extension CashMachine: ScannerDelegate {
                 return
             }
         }
-        for i in registeredGoods[0..<registeredGoods.count] {
-            if i.code == item.code {
-                shoplist.append(item)
-                showableItemsArray.observable += mapper.makeDemonstrationItems(scannedGoods: item, registeredGoods: registeredGoods)
-                return
-            }
+        
+        if registeredGoods[item.code] == nil {
+            throw CashmachineErrors.goodsNotFound
         }
-        throw CashmashineErrors.goodsNotFound
+        shoplist.append(item)
+        showableItemsArray.observable += try mapper.makeDemonstrationItems(item: item, registeredGoods: registeredGoods)
     }
 }
 

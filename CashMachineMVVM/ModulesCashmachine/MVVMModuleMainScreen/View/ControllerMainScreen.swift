@@ -10,7 +10,7 @@ import UIKit
 
 class ControllerMainScreen: UIViewController {
     
-    private var viewModel: MainScreenViewModelProtocol!
+    private var viewModel: MainScreenViewModelProtocol
     
     var registeredDigits: Observable<RegisteredDigits> = Observable<RegisteredDigits>(observable: RegisteredDigits(name: "", code: "", priceCurrency: "", priceValue: 0, tax: TaxMode(rawValue: 0.1) ?? TaxMode(rawValue: 100)!))
     
@@ -41,45 +41,59 @@ class ControllerMainScreen: UIViewController {
     private weak var scan: UIButton!
     private weak var pay: UIButton!
     
+    private weak var widthReg: NSLayoutConstraint!
+    private weak var widthCom: NSLayoutConstraint!
+    
     private weak var tableViewButton: UIButton!
     
     private weak var tableView: UITableView!
     
-    weak var bill: UITextView!
-    
-//    private var listOfPurchases = [InterfaceItems]() {
-//        didSet {
-//            tableView.reloadData()
-//        }
-//    }
+    private weak var bill: UITextView!
     
     init(viewModel: MainScreenViewModelProtocol) {
         self.viewModel = viewModel
-        super.init(nibName:  nil, bundle: nil)
-        view.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-        layout()
+        super.init(nibName: nil, bundle: nil)
+        dataBindingWithViewModel()
+    }
+    
+    //MARK: init for IB
+    required init?(coder aDecoder: NSCoder) {
+        print(#function)
+        self.viewModel = DependenceProvider.resolve()
+        super.init(coder: aDecoder)
+        dataBindingWithViewModel()
         
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        print(#function)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()  // Liskov
+        print(#function)
         view.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
         layout()
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        viewModel.state.bind { [weak self] vmState in
-            guard let self = self else {
-                return
-            }
-            
+
+        viewModel.state.bind { [unowned self] vmState in
             switch vmState {
-            case .initial: return
+            case .initial: print("Initial state")
             case .printBill: self.displayBill()
             case .errorHappend: self.displayError()
             case .chosenShowableItems: self.tableView.reloadData()
             }
+        }
+        
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        print(#function)
+        if view.traitCollection.horizontalSizeClass == .regular {
+            self.widthReg.constant = 300
+        } else {
+            self.widthReg.constant = 150
         }
     }
     
@@ -94,8 +108,42 @@ class ControllerMainScreen: UIViewController {
         codeScan.text = ""
         quantity.text = ""
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        //navigationController?.setToolbarHidden(true, animated: true)
+    }
 }
 
+extension ControllerMainScreen {
+    
+    override var navigationItem: UINavigationItem {
+        let navItem = UINavigationItem(title: "ControllerMainScreen")
+        let editBarButton = self.editButtonItem
+        //let editBarButton = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editBarAction(sender:)))
+        editBarButton.target = self
+        editBarButton.action = #selector(editBarAction(sender:))
+        navItem.rightBarButtonItem = editBarButton
+        return navItem
+    }
+    
+    func dataBindingWithViewModel() {
+        self.registeredDigits.bind { [unowned self] item in
+            // a verify, (whithout it) otherwise viewModel performs registerItem with empty values
+            if item.code == "" {
+                return
+            }
+            self.viewModel.registerItem(name: item.name, code: item.code, priceCurrency: item.priceCurrency, priceValue: item.priceValue, tax: item.tax)
+        }
+        self.scunnedDigits.bind { [unowned self] item in
+            if item.code == "" {
+                return
+            }
+            self.viewModel.scanItem(code: item.code, quantity: item.quantity)
+        }
+        
+    }
+}
 
 
 extension ControllerMainScreen {
@@ -141,10 +189,15 @@ extension ControllerMainScreen {
         fieldCurrency.placeholder = "Currency"
         fieldCurrency.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(fieldCurrency)
+        
         let topCurrency = fieldCurrency.topAnchor.constraint(equalTo: fieldCodeRegist.bottomAnchor, constant: 10)
         let centerXCurrency = fieldCurrency.centerXAnchor.constraint(equalTo: fieldName.centerXAnchor)
         let widthCurrency = fieldCurrency.widthAnchor.constraint(equalToConstant: 150)
+        self.widthReg = widthCurrency
+        
         let heightFieldCurrency = fieldCurrency.heightAnchor.constraint(equalToConstant: 40)
+       
+        
         arrayConstraints.append(contentsOf: [topCurrency, centerXCurrency, widthCurrency, heightFieldCurrency])
         currency = fieldCurrency
         
@@ -191,9 +244,10 @@ extension ControllerMainScreen {
         fieldQuantity.placeholder = "Quantity"
         fieldQuantity.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(fieldQuantity)
+        
         let topQuantity = fieldQuantity.topAnchor.constraint(equalTo: fieldCodeScan.bottomAnchor, constant: 10)
         let centerXQuantity = fieldQuantity.centerXAnchor.constraint(equalTo: fieldName.centerXAnchor)
-        let widthQuantity = fieldQuantity.widthAnchor.constraint(equalToConstant: 150)
+        let widthQuantity = fieldQuantity.widthAnchor.constraint(greaterThanOrEqualToConstant: 150)
         let heightQuantity = fieldQuantity.heightAnchor.constraint(equalToConstant: 40)
         arrayConstraints.append(contentsOf: [topQuantity, centerXQuantity, widthQuantity, heightQuantity])
         quantity = fieldQuantity
@@ -274,7 +328,6 @@ extension ControllerMainScreen {
         register.addTarget(self, action: #selector(buttonRegistAction), for: .touchUpInside)
         
         
-        
         let buttonScan = RoundedButton()
         buttonScan.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(buttonScan)
@@ -286,22 +339,12 @@ extension ControllerMainScreen {
         scan = buttonScan
         scan.addTarget(self, action: #selector(buttonScanAction), for: .touchUpInside)
         
-        let buttonTableView = RoundedButton()
-        buttonTableView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(buttonTableView)
-        buttonTableView.setTitle("Посмотреть список товаров", for: .normal)
-        let topTableView = buttonTableView.topAnchor.constraint(equalTo: buttonScan.bottomAnchor, constant: 30)
-        let widthTableView = buttonTableView.widthAnchor.constraint(equalToConstant: 300)
-        let centerXTableView = buttonTableView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)
-        arrayConstraints.append(contentsOf: [topTableView, widthTableView, centerXTableView])
-        tableViewButton = buttonTableView
-        tableViewButton.addTarget(self, action: #selector(showInformationController), for: .touchUpInside)
         
         let buttonPay = RoundedButton()
         buttonPay.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(buttonPay)
         buttonPay.setTitle("Pay", for: .normal)
-        let topPay = buttonPay.topAnchor.constraint(equalTo: buttonTableView.bottomAnchor, constant: 50)
+        let topPay = buttonPay.topAnchor.constraint(equalTo: scan.bottomAnchor, constant: 50)
         let widthPay = buttonPay.widthAnchor.constraint(equalToConstant: 80)
         let centerXPay = buttonPay.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)
         arrayConstraints.append(contentsOf: [topPay, widthPay, centerXPay])
@@ -314,32 +357,36 @@ extension ControllerMainScreen {
         table.register(GoodsTableViewCell.self, forCellReuseIdentifier: "GoodsTableViewCell")
         table.dataSource = self
         table.delegate = self
+        table.backgroundColor = .white
         table.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(table)
         let topTable = table.topAnchor.constraint(equalTo: buttonPay.bottomAnchor, constant: 30)
         let leadingTable = table.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
         let trailingTable = table.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         let heightTable = table.heightAnchor.constraint(equalToConstant: 400)
+        
         tableView = table
+        
         arrayConstraints.append(contentsOf: [topTable, leadingTable, trailingTable, heightTable])
         
-        let itemTaxtView = UITextView()
-        itemTaxtView.backgroundColor = .white
-        itemTaxtView.font = .systemFont(ofSize: 17)
-        itemTaxtView.textColor = UIColor.black
-        itemTaxMode.font.withSize(CGFloat(27))
-        itemTaxtView.layer.borderWidth = 1
-        itemTaxtView.layer.cornerRadius = 5
-        itemTaxtView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        itemTaxtView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(itemTaxtView)
-        let topTextView = itemTaxtView.topAnchor.constraint(equalTo: table.bottomAnchor, constant: 30)
-        let leadingTextView = itemTaxtView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
-        let trailingTextView = itemTaxtView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
-        let heightTextView = itemTaxtView.heightAnchor.constraint(equalToConstant: 400)
-        let bottonTextView = itemTaxtView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20)
+        let itemTextView = UITextView()
+        itemTextView.backgroundColor = .white
+        itemTextView.textAlignment = .left
+        
+        itemTextView.font = UIFont.init(name: "Arial", size: 28) ?? .systemFont(ofSize: 20)
+        itemTextView.textColor = UIColor.black
+        itemTextView.layer.borderWidth = 1
+        itemTextView.layer.cornerRadius = 5
+        itemTextView.layoutMargins = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        itemTextView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(itemTextView)
+        let topTextView = itemTextView.topAnchor.constraint(equalTo: table.bottomAnchor, constant: 30)
+        let leadingTextView = itemTextView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
+        let trailingTextView = itemTextView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        let heightTextView = itemTextView.heightAnchor.constraint(equalToConstant: 400)
+        let bottonTextView = itemTextView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20)
         arrayConstraints.append(contentsOf: [topTextView, leadingTextView, trailingTextView, heightTextView, bottonTextView])
-        bill = itemTaxtView
+        bill = itemTextView
         
         NSLayoutConstraint.activate(arrayConstraints)
     }
@@ -348,6 +395,7 @@ extension ControllerMainScreen {
 
 extension ControllerMainScreen {
     @objc private func buttonRegistAction() {
+        
         if name.text! == "" {
             bill.text = "Пустое поле name"
             return
@@ -411,19 +459,19 @@ extension ControllerMainScreen {
             cleanScanText()
     }
     
-    @objc private func showInformationController() {
-       // outPut.shoppigListButtonTapped()
+    @objc private func buttonPayAction() {
+        viewModel.pay()
     }
     
-    @objc private func buttonPayAction() {
-        viewModel?.pay()
+    @objc private func editBarAction(sender: UIBarButtonItem) {
+        self.tableView.isEditing = !self.tableView.isEditing
+        sender.title = (self.tableView.isEditing ? "Done" : "Edit")
     }
 }
 
 extension ControllerMainScreen {
     func displayBill() {
-        let check = viewModel.readyBill
-        bill.text = check
+        bill.text = viewModel.readyBill
     }
     
     func displayError() {
@@ -436,13 +484,15 @@ extension ControllerMainScreen {
 }
 
 extension ControllerMainScreen: UITableViewDelegate, UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.numberOfRows() 
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "GoodsTableViewCell", for: indexPath) as? GoodsTableViewCell
-        guard let tableViewCell = cell, let viewModel = viewModel else { return UITableViewCell() }
+        
+        guard let tableViewCell = cell else { return UITableViewCell() }
         let cellViewModel = viewModel.cellViewModel(forIndexPath: indexPath)
         tableViewCell.viewModel = cellViewModel
         return tableViewCell
@@ -450,9 +500,12 @@ extension ControllerMainScreen: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            self.viewModel?.removeScannedItems(at: indexPath.row)
+            self.viewModel.removeScannedItems(at: indexPath.row)
         }
-        // вид интерактивного удаления
-        //tableView.deleteRows(at: [indexPath], with: .fade)
+    }
+    
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        if viewModel.numberOfRows() == 1 { return }
+        viewModel.moveRow(at: sourceIndexPath.row, to: destinationIndexPath.row)
     }
 }

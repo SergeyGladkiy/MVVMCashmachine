@@ -8,10 +8,10 @@
 
 import Foundation
 
-class ModelItem {  // CashmachineModel naming
-    private let model: CashMachine
+class CashmachineModel {  
+    private unowned let model: CashMachine
     
-    var showableItemsArray: Observable<[ShowableItems]> = Observable<[ShowableItems]>(observable: [])
+    var dataOfItems = [ShowableItems]()
     
     var errorOccure: Observable<String> = Observable<String>(observable: "")
     
@@ -20,19 +20,18 @@ class ModelItem {  // CashmachineModel naming
     init(model: CashMachine) {
         self.model = model
         model.showableItemsArray.bind { array in
-            self.showableItemsArray.observable = array
+            self.dataOfItems = array
         }
         model.billPrinter = Printer(check: self)
     }
 }
 
-extension ModelItem: ModelProtocol {
+extension CashmachineModel: ModelProtocol {
     func registerItem(name: String, code: String, priceCurrency: String, priceValue: Double, tax: TaxMode) {
         do {
-            try model.register(item: RegisterableItem(name: name, code: code, price: Price(currencyUnit: priceCurrency, value: priceValue), tax: tax))
-        } catch let error as CashmashineErrors {
+            try model.register(code: code, item: RegisterableItem(name: name, price: Price(currencyUnit: priceCurrency, value: priceValue), tax: tax))
+        } catch let error as CashmachineErrors {
             errorOccure.observable = error.localizedDescription
-            print("!!!!!\(errorOccure.observable)")
             return
         } catch {
             errorOccure.observable = "ERROR"
@@ -42,7 +41,7 @@ extension ModelItem: ModelProtocol {
     func scanItem(code: String, quantity: Double) {
         do {
             try model.scan(item: ScannableItem(code: code, quantity: quantity))
-        } catch let error as CashmashineErrors {
+        } catch let error as CashmachineErrors {
             errorOccure.observable = error.localizedDescription
             return
         } catch {
@@ -51,15 +50,33 @@ extension ModelItem: ModelProtocol {
     }
     
     func pay() {
-        model.pay()
+        do {
+            try model.pay()
+        } catch let error as CashmachineErrors {
+            errorOccure.observable = error.localizedDescription
+            return
+        } catch {
+            errorOccure.observable = "ERROR"
+        }
     }
     
     func deleteItem(index: Int) {
         model.removeScannedItem(index: index)
     }
+    
+    func changeSubscriptOfItem(from: Int, to: Int) {
+        do {
+            try model.motionItem(index: from, newIndex: to)
+        } catch let error as CashmachineErrors {
+            errorOccure.observable = error.localizedDescription
+            return
+        } catch {
+            errorOccure.observable = "ERROR"
+        }
+    }
 }
 
-extension ModelItem: MakeBill {
+extension CashmachineModel: MakeBill {
     func printCheck(_ data: String) {
         readyBill.observable = data
     }

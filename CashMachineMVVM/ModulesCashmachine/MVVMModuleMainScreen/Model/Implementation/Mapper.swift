@@ -14,43 +14,39 @@ class Mapper {
 
 extension Mapper: IMapper {
     
-    func makeTaxableItems(scannedGoods: [ScannableItem], registeredGoods: [RegisterableItem]) -> [TaxableItem] {
-        var arTaxableItems = [TaxableItem]()
-        
-        //let set: Set<[ScannableItem]> = scannedGoods
-       // let array = registeredGoods.map({ let ar = TaxableItem(price: , quantity: <#T##Double#>, taxes: <#T##TaxMode#>) in return TaxableItem(price: $0.price, quantity: $0.qu, taxes: <#T##TaxMode#>)})
-        for i in scannedGoods {
-            for j in registeredGoods {
-                if i.code == j.code {
-                    switch j.tax {
-                    case .Excise: arTaxableItems.append(TaxableItem(price: j.price.value, quantity: i.quantity, taxes: .Excise))
-                    case .NDS: arTaxableItems.append(TaxableItem(price: j.price.value, quantity: i.quantity, taxes: .NDS))
-                    }
-                }
+    func makeTaxableItems(scannedGoods: [ScannableItem], registeredGoods: [String: RegisterableItem]) throws -> [TaxableItem] {
+        return try scannedGoods.map { (item) -> TaxableItem in
+            guard let key = registeredGoods[item.code] else {
+                throw CashmachineErrors.goodsNotFound
             }
+            return TaxableItem(price: key.price.value, quantity: item.quantity, taxes: key.tax)
         }
-        return arTaxableItems
     }
     
-    func makePrintableItems(scannedGoods: [ScannableItem], registeredGoods: [RegisterableItem]) -> [PrintableItem] {
-        var arPrintableItems = [PrintableItem]()
-        for i in scannedGoods {
-            for j in registeredGoods {
-                if i.code == j.code {
-                    arPrintableItems.append(PrintableItem(code: i.code, name: j.name, quantity: i.quantity, priceValue: j.price.value))
-                }
+    func makePrintableItems(scannedGoods: [ScannableItem], registeredGoods: [String: RegisterableItem]) throws -> [PrintableItem] {
+        return try scannedGoods.map { item -> PrintableItem in
+            guard let key = registeredGoods[item.code] else {
+                throw CashmachineErrors.goodsNotFound
             }
+            return PrintableItem(code: item.code, name: key.name, quantity: item.quantity, priceValue: key.price.value)
         }
-        return arPrintableItems
     }
     
-    func makeDemonstrationItems(scannedGoods: ScannableItem, registeredGoods: [RegisterableItem]) -> [ShowableItems] {
-        var arrayTableView = [ShowableItems]()
-        for item in registeredGoods {
-            if scannedGoods.code == item.code {
-                arrayTableView.append(ShowableItems(code: scannedGoods.code, quantity: scannedGoods.quantity, name: item.name, value: item.price.value))
-            }
+    func makeDemonstrationItems(item: ScannableItem, registeredGoods: [String: RegisterableItem]) throws -> [ShowableItems] {
+        var array = [ShowableItems]()
+        guard let key = registeredGoods[item.code] else {
+            throw CashmachineErrors.goodsNotFound
         }
-        return arrayTableView
+        array.append(ShowableItems(code: item.code, quantity: item.quantity, name: key.name, value: key.price.value))
+        return array
+    }
+    
+    func performConversions(scanItems: [ScannableItem], regItems: [String: RegisterableItem]) throws -> [ShowableItems] {
+        return try scanItems.map { item -> ShowableItems in
+            guard let key = regItems[item.code] else {
+                throw CashmachineErrors.goodsNotFound
+            }
+            return ShowableItems(code: item.code, quantity: item.quantity, name: key.name, value: key.price.value)
+        }
     }
 }

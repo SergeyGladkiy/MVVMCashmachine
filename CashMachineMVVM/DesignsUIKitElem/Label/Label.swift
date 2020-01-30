@@ -11,13 +11,14 @@ import UIKit
 class Label: UILabel {
     override func layoutSubviews() {
         super.layoutSubviews()
-        let desing = buildDising()
+        let desing = buildDisign()
         textColor = desing.fontTitle.fontColor
         font = font.withSize(CGFloat(desing.fontTitle.font))
+        setContentHuggingPriority(UILayoutPriority(251), for: .horizontal)
         
     }
     
-    func buildDising() -> ILabelDising {
+    func buildDisign() -> ILabelDisign {
         fatalError("переопредели со своим дизайном, редиска")
     }
 }

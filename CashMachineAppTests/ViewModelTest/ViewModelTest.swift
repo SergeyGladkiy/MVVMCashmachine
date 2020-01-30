@@ -18,7 +18,7 @@ class ViewModelTest: XCTestCase {
         super.setUp()
         let mapper = MapperMock()
         modelMock = CashMachineMock(mapper: mapper)
-        viewModel = ViewModelMainScreen(state: .initial, model: modelMock)
+        viewModel = ViewModelMainScreen(state: Observable<ViewModelMainScreenState>.init(observable: .initial), model: modelMock)
         
     }
     
@@ -70,10 +70,10 @@ class ViewModelTest: XCTestCase {
     func testStateErrorHappend() {
         //given
         let item = EntityMocker.generateRegisterableItem()
-        
+        let key = EntityMocker.generateKeyForRegistration()
         //when
         viewModel.twoWayDataBinding()
-        viewModel.registerItem(name: item.name, code: item.code, priceCurrency: item.price.currencyUnit, priceValue: item.price.value, tax: item.tax)
+        viewModel.registerItem(name: item[key]!.name, code: key, priceCurrency: item[key]!.price.currencyUnit, priceValue: item[key]!.price.value, tax: item[key]!.tax)
         
         viewModel.state.bind { [weak viewModel] state in
             guard let viewModel = viewModel else {
